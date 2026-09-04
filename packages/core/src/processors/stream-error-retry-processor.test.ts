@@ -113,6 +113,25 @@ describe('StreamErrorRetryProcessor', () => {
     expect(isRetryableOpenAIResponsesStreamError(error)).toBe(true);
   });
 
+  it('retries Azure OpenAI Responses capacity errors by default', async () => {
+    const streamError = {
+      type: 'error',
+      sequence_number: 2,
+      error: {
+        type: 'too_many_requests',
+        code: 'no_capacity',
+        message:
+          'The system is currently experiencing high demand and cannot process your request. Your request exceeds the maximum usage size allowed during peak load. For improved capacity reliability, consider switching to Provisioned Throughput.',
+        param: null,
+      },
+    };
+    const error = Object.assign(new Error(JSON.stringify(streamError)), streamError);
+    const processor = new StreamErrorRetryProcessor();
+
+    expect(isRetryableOpenAIResponsesStreamError(error)).toBe(true);
+    await expect(processor.processAPIError(makeArgs({ error }))).resolves.toEqual({ retry: true });
+  });
+
   it('retries OpenAI Responses stream error chunks by default', async () => {
     const processor = new StreamErrorRetryProcessor();
     const error = {

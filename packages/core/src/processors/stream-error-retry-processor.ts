@@ -49,6 +49,7 @@ export type StreamErrorRetryProcessorOptions = {
 const DEFAULT_MAX_RETRIES = 1;
 const RETRYABLE_OPENAI_ERROR_CODES = [
   'rate_limit',
+  'no_capacity',
   'server_error',
   'internal_error',
   'timeout',
